@@ -1,0 +1,28 @@
+/* Basic CSS Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  background: #f7f7fa;
+  color: #22223b;
+  min-height: 100vh;
+}
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e0e7ff 0%, #f7f7fa 100%);
+}
+
+h1 {
+  font-size: 2.5rem;
+  color: #3b5bdb;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
