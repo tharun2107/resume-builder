@@ -1,38 +1,50 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "./index.css";
 
-function SectionList({ title, items, onAdd, onEdit, onDelete, renderItem, addLabel, emptyLabel }) {
+// Helper: initial form state per section
+const initialForms = {
+  experience: { company: '', role: '', duration: '', details: '' },
+  projects: { title: '', link: '', description: '' },
+  education: { degree: '', institution: '', year: '', cgpa: '' },
+  certifications: { name: '' },
+};
+
+function SectionList({ sectionKey, title, items, onAdd, onEdit, onDelete, renderItem, addLabel, emptyLabel }) {
   const [editingIndex, setEditingIndex] = useState(null);
-  const [form, setForm] = useState({});
+  const [form, setForm] = useState(initialForms[sectionKey] || {});
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
   const handleEdit = (idx) => {
     setEditingIndex(idx);
     setForm(items[idx]);
   };
-  const handleSave = (e) => {
+  const handleEditSave = (e) => {
     e.preventDefault();
-    if (editingIndex !== null) {
-      onEdit(editingIndex, form);
-      setEditingIndex(null);
-      setForm({});
-    } else {
+    onEdit(editingIndex, form);
+    setEditingIndex(null);
+    setForm(initialForms[sectionKey] || {});
+  };
+  const handleAddSave = (e) => {
+    e.preventDefault();
+    // Only add if at least one field is filled
+    const hasValue = Object.values(form).some(v => v && v.trim() !== '');
+    if (hasValue) {
       onAdd(form);
-      setForm({});
+      setForm(initialForms[sectionKey] || {});
     }
   };
   const handleCancel = () => {
     setEditingIndex(null);
-    setForm({});
+    setForm(initialForms[sectionKey] || {});
   };
   return (
     <fieldset style={{ border: 'none', marginBottom: '1.5rem' }}>
-      <legend style={{ fontWeight: 'bold', color: '#22223b' }}>{title}</legend>
+      <legend style={{ fontWeight: 'bold', color: '#111', fontSize: '1.15rem', letterSpacing: '0.5px' }}>{title}</legend>
       <ul style={{ padding: 0, listStyle: 'none', marginBottom: '1rem' }}>
         {items.length === 0 && <li style={{ color: '#888' }}>{emptyLabel}</li>}
         {items.map((item, idx) => (
           <li key={idx} style={{ marginBottom: '0.5rem', background: '#f3f4fa', padding: '0.5rem', borderRadius: '6px' }}>
             {editingIndex === idx ? (
-              <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <form onSubmit={handleEditSave} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {renderItem(form, handleChange)}
                 <div>
                   <button type="submit" style={{ marginRight: 8, background: '#3b5bdb', color: '#fff', border: 'none', borderRadius: 4, padding: '4px 10px', cursor: 'pointer' }}>Save</button>
@@ -52,7 +64,7 @@ function SectionList({ title, items, onAdd, onEdit, onDelete, renderItem, addLab
         ))}
       </ul>
       {editingIndex === null && (
-        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <form onSubmit={handleAddSave} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {renderItem(form, handleChange)}
           <button type="submit" style={{ background: '#3b5bdb', color: '#fff', border: 'none', borderRadius: 4, padding: '4px 10px', cursor: 'pointer', alignSelf: 'flex-start' }}>{addLabel}</button>
         </form>
@@ -82,6 +94,7 @@ function App() {
   const [skillInput, setSkillInput] = useState("");
   const [customSectionTitle, setCustomSectionTitle] = useState("");
   const [customSectionItem, setCustomSectionItem] = useState("");
+  const previewRef = useRef();
 
   // Handlers for basic fields
   const handlePersonalInfoChange = (e) => {
@@ -126,14 +139,34 @@ function App() {
     }
   };
 
+  // PDF Download
+  const handleDownloadPDF = async () => {
+    const html2pdf = (await import("html2pdf.js")).default;
+    html2pdf(previewRef.current, {
+      margin: 0.5,
+      filename: `${resume.personalInfo.name || "resume"}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+    });
+  };
+
+  // ATS-friendly preview styles
+  const sectionHeader = { fontWeight: 700, fontSize: '1.1rem', color: '#111', borderBottom: '1px solid #bbb', margin: '1.2em 0 0.5em 0', letterSpacing: '0.5px' };
+  const label = { fontWeight: 700, color: '#111' };
+  const dateStyle = { float: 'right', color: '#444', fontSize: '0.98rem', fontWeight: 400 };
+  const bulletList = { margin: '0.2em 0 0.7em 1.2em', padding: 0, color: '#222', fontSize: '1.01rem' };
+  const bullet = { marginBottom: '0.2em', listStyle: 'disc' };
+
   return (
     <div className="app-container" style={{ minHeight: '100vh', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', background: 'linear-gradient(135deg, #e0e7ff 0%, #f7f7fa 100%)' }}>
       {/* Left: Resume Form */}
       <div style={{ width: '420px', background: '#fff', borderRadius: '12px', boxShadow: '0 2px 16px #e0e7ff', padding: '2rem', margin: '2rem 1rem', minHeight: '80vh', overflowY: 'auto', maxHeight: '90vh' }}>
-        <h2 style={{ fontSize: '1.5rem', color: '#3b5bdb', marginBottom: '1.5rem' }}>Resume Builder</h2>
-        <form autoComplete="off">
+        <h2 style={{ fontSize: '1.5rem', color: '#111', marginBottom: '1.5rem', fontWeight: 700, letterSpacing: '0.5px' }}>Resume Builder</h2>
+        <form autoComplete="off" onSubmit={e => e.preventDefault()}>
+          {/* ... Personal Info, Summary, Skills ... */}
           <fieldset style={{ border: 'none', marginBottom: '1.5rem' }}>
-            <legend style={{ fontWeight: 'bold', color: '#22223b' }}>Personal Info</legend>
+            <legend style={{ fontWeight: 'bold', color: '#111', fontSize: '1.15rem', letterSpacing: '0.5px' }}>Personal Info</legend>
             <input name="name" placeholder="Full Name" value={resume.personalInfo.name} onChange={handlePersonalInfoChange} style={{ width: '100%', margin: '8px 0', padding: '8px' }} />
             <input name="email" placeholder="Email" value={resume.personalInfo.email} onChange={handlePersonalInfoChange} style={{ width: '100%', margin: '8px 0', padding: '8px' }} />
             <input name="phone" placeholder="Phone" value={resume.personalInfo.phone} onChange={handlePersonalInfoChange} style={{ width: '100%', margin: '8px 0', padding: '8px' }} />
@@ -141,20 +174,20 @@ function App() {
             <input name="github" placeholder="GitHub" value={resume.personalInfo.github} onChange={handlePersonalInfoChange} style={{ width: '100%', margin: '8px 0', padding: '8px' }} />
           </fieldset>
           <fieldset style={{ border: 'none', marginBottom: '1.5rem' }}>
-            <legend style={{ fontWeight: 'bold', color: '#22223b' }}>Summary</legend>
+            <legend style={{ fontWeight: 'bold', color: '#111', fontSize: '1.15rem', letterSpacing: '0.5px' }}>Summary</legend>
             <textarea placeholder="Short objective or bio" value={resume.summary} onChange={handleSummaryChange} style={{ width: '100%', minHeight: '60px', margin: '8px 0', padding: '8px' }} />
           </fieldset>
           <fieldset style={{ border: 'none', marginBottom: '1.5rem' }}>
-            <legend style={{ fontWeight: 'bold', color: '#22223b' }}>Skills</legend>
+            <legend style={{ fontWeight: 'bold', color: '#111', fontSize: '1.15rem', letterSpacing: '0.5px' }}>Skills</legend>
             <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
               <input type="text" placeholder="Add a skill" value={skillInput} onChange={handleSkillInput} style={{ flex: 1, padding: '8px' }} />
               <button onClick={handleAddSkill} style={{ padding: '8px 12px', background: '#3b5bdb', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Add</button>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               {resume.skills.map((skill) => (
-                <span key={skill} style={{ background: '#e0e7ff', color: '#3b5bdb', padding: '4px 10px', borderRadius: '12px', fontSize: '0.95rem', display: 'flex', alignItems: 'center' }}>
+                <span key={skill} style={{ background: '#e0e7ff', color: '#111', padding: '4px 10px', borderRadius: '12px', fontSize: '0.98rem', display: 'flex', alignItems: 'center' }}>
                   {skill}
-                  <button type="button" onClick={() => handleRemoveSkill(skill)} style={{ marginLeft: '6px', background: 'none', border: 'none', color: '#3b5bdb', cursor: 'pointer', fontWeight: 'bold' }}>&times;</button>
+                  <button type="button" onClick={() => handleRemoveSkill(skill)} style={{ marginLeft: '6px', background: 'none', border: 'none', color: '#111', cursor: 'pointer', fontWeight: 'bold' }}>&times;</button>
                 </span>
               ))}
             </div>
@@ -162,6 +195,7 @@ function App() {
 
           {/* Experience Section */}
           <SectionList
+            sectionKey="experience"
             title="Experience"
             items={resume.experience}
             onAdd={(item) => addSectionItem("experience", item)}
@@ -179,8 +213,11 @@ function App() {
                 </>
               ) : (
                 <>
-                  <strong>{item.role}</strong> at <strong>{item.company}</strong> ({item.duration})<br />
-                  <span style={{ color: '#555', fontSize: '0.95em' }}>{Array.isArray(item.details) ? item.details.join(", ") : item.details}</span>
+                    <span style={label}>{item.role}</span> at <span style={label}>{item.company}</span>
+                    <span style={dateStyle}>{item.duration}</span>
+                    <ul style={bulletList}>
+                      {(item.details || '').split(',').map((d, i) => d.trim() && <li key={i} style={bullet}>{d.trim()}</li>)}
+                    </ul>
                 </>
               )
             }
@@ -188,6 +225,7 @@ function App() {
 
           {/* Projects Section */}
           <SectionList
+            sectionKey="projects"
             title="Projects"
             items={resume.projects}
             onAdd={(item) => addSectionItem("projects", item)}
@@ -200,12 +238,14 @@ function App() {
                 <>
                   <input name="title" placeholder="Title" value={item.title || ""} onChange={onChange} style={{ padding: '6px' }} />
                   <input name="link" placeholder="Link" value={item.link || ""} onChange={onChange} style={{ padding: '6px' }} />
-                  <textarea name="description" placeholder="Description" value={item.description || ""} onChange={onChange} style={{ padding: '6px' }} />
+                  <textarea name="description" placeholder="Description (comma separated for bullets)" value={item.description || ""} onChange={onChange} style={{ padding: '6px' }} />
                 </>
               ) : (
                 <>
-                  <strong>{item.title}</strong> {item.link && (<a href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: '#3b5bdb', marginLeft: 4, fontSize: '0.95em' }}>[link]</a>)}<br />
-                  <span style={{ color: '#555', fontSize: '0.95em' }}>{item.description}</span>
+                    <span style={label}>{item.title}</span> {item.link && (<a href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: '#3b5bdb', marginLeft: 4, fontSize: '0.95em' }}>[link]</a>)}
+                    <ul style={bulletList}>
+                      {(item.description || '').split(',').map((d, i) => d.trim() && <li key={i} style={bullet}>{d.trim()}</li>)}
+                    </ul>
                 </>
               )
             }
@@ -213,6 +253,7 @@ function App() {
 
           {/* Education Section */}
           <SectionList
+            sectionKey="education"
             title="Education"
             items={resume.education}
             onAdd={(item) => addSectionItem("education", item)}
@@ -230,8 +271,9 @@ function App() {
                 </>
               ) : (
                 <>
-                  <strong>{item.degree}</strong> at <strong>{item.institution}</strong> ({item.year})<br />
-                  <span style={{ color: '#555', fontSize: '0.95em' }}>CGPA: {item.cgpa}</span>
+                    <span style={label}>{item.degree}</span> at <span style={label}>{item.institution}</span>
+                    <span style={dateStyle}>{item.year}</span>
+                    <span style={{ color: '#555', fontSize: '0.98em', marginLeft: 8 }}>CGPA: {item.cgpa}</span>
                 </>
               )
             }
@@ -239,6 +281,7 @@ function App() {
 
           {/* Certifications Section */}
           <SectionList
+            sectionKey="certifications"
             title="Certifications"
             items={resume.certifications}
             onAdd={(item) => addSectionItem("certifications", item.name ? item : { name: item })}
@@ -250,14 +293,14 @@ function App() {
               onChange ? (
                 <input name="name" placeholder="Certification" value={item.name || ""} onChange={onChange} style={{ padding: '6px' }} />
               ) : (
-                <span>{item.name}</span>
+                  <span style={label}>{item.name}</span>
               )
             }
           />
 
           {/* Custom Sections */}
           <fieldset style={{ border: 'none', marginBottom: '1.5rem' }}>
-            <legend style={{ fontWeight: 'bold', color: '#22223b' }}>Custom Sections</legend>
+            <legend style={{ fontWeight: 'bold', color: '#111', fontSize: '1.15rem', letterSpacing: '0.5px' }}>Custom Sections</legend>
             <form onSubmit={handleAddCustomSection} style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
               <input type="text" placeholder="Section Title" value={customSectionTitle} onChange={e => setCustomSectionTitle(e.target.value)} style={{ flex: 1, padding: '6px' }} />
               <input type="text" placeholder="Item (optional)" value={customSectionItem} onChange={e => setCustomSectionItem(e.target.value)} style={{ flex: 1, padding: '6px' }} />
@@ -267,11 +310,11 @@ function App() {
               {resume.customSections.length === 0 && <li style={{ color: '#888' }}>No custom sections added.</li>}
               {resume.customSections.map((section, idx) => (
                 <li key={idx} style={{ marginBottom: '0.5rem', background: '#f3f4fa', padding: '0.5rem', borderRadius: '6px' }}>
-                  <strong>{section.title}</strong>
+                  <span style={label}>{section.title}</span>
                   {section.items && section.items.length > 0 && (
-                    <ul style={{ paddingLeft: '1.2em', margin: 0 }}>
+                    <ul style={bulletList}>
                       {section.items.map((item, i) => (
-                        <li key={i}>{item}</li>
+                        <li key={i} style={bullet}>{item}</li>
                       ))}
                     </ul>
                   )}
@@ -281,93 +324,75 @@ function App() {
           </fieldset>
         </form>
       </div>
-      {/* Right: Live Preview */}
-      <div style={{ flex: 1, background: '#f7f7fa', borderRadius: '12px', boxShadow: '0 2px 16px #e0e7ff', padding: '2rem', margin: '2rem 1rem', minHeight: '80vh', overflowY: 'auto', maxHeight: '90vh' }}>
-        <h2 style={{ fontSize: '1.5rem', color: '#3b5bdb', marginBottom: '1.5rem' }}>Live Preview</h2>
-        <div style={{ background: '#fff', borderRadius: '8px', padding: '2rem', minHeight: '60vh', boxShadow: '0 1px 8px #e0e7ff' }}>
-          <h1 style={{ fontSize: '2rem', color: '#3b5bdb', marginBottom: '0.5rem' }}>{resume.personalInfo.name || 'Your Name'}</h1>
-          <div style={{ color: '#666', marginBottom: '0.5rem' }}>
-            {resume.personalInfo.email && <span>{resume.personalInfo.email} | </span>}
-            {resume.personalInfo.phone && <span>{resume.personalInfo.phone} | </span>}
-            {resume.personalInfo.linkedin && <span>LinkedIn: {resume.personalInfo.linkedin} | </span>}
-            {resume.personalInfo.github && <span>GitHub: {resume.personalInfo.github}</span>}
-          </div>
-          {resume.summary && <p style={{ margin: '1rem 0', color: '#222' }}>{resume.summary}</p>}
-          {resume.skills.length > 0 && (
-            <div style={{ margin: '1rem 0' }}>
-              <strong>Skills:</strong>
-              <ul style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', listStyle: 'none', padding: 0, margin: 0 }}>
-                {resume.skills.map((skill) => (
-                  <li key={skill} style={{ background: '#e0e7ff', color: '#3b5bdb', padding: '4px 10px', borderRadius: '12px', fontSize: '0.95rem' }}>{skill}</li>
-                ))}
-              </ul>
+      {/* Right: ATS Resume Preview */}
+      <div style={{ flex: 1, background: '#fff', borderRadius: '12px', boxShadow: '0 2px 16px #e0e7ff', padding: '2.5rem 2.5rem 2rem 2.5rem', margin: '2rem 1rem', minHeight: '80vh', overflowY: 'auto', maxHeight: '90vh', fontFamily: 'Arial, Helvetica, sans-serif', color: '#111' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <h1 style={{ fontSize: '1.7rem', color: '#111', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', margin: 0 }}>{resume.personalInfo.name || 'Your Name'}</h1>
+          <button onClick={handleDownloadPDF} style={{ background: '#111', color: '#fff', border: 'none', borderRadius: 4, padding: '8px 16px', cursor: 'pointer', fontWeight: 600, fontSize: '1rem' }}>Download PDF</button>
+        </div>
+        <div style={{ fontSize: '1.01rem', marginBottom: '0.7rem' }}>
+          {resume.personalInfo.email && <span>{resume.personalInfo.email} | </span>}
+          {resume.personalInfo.phone && <span>{resume.personalInfo.phone} | </span>}
+          {resume.personalInfo.linkedin && <span>LinkedIn: {resume.personalInfo.linkedin} | </span>}
+          {resume.personalInfo.github && <span>GitHub: {resume.personalInfo.github}</span>}
+        </div>
+        {resume.summary && <div style={{ margin: '0.7em 0 1.2em 0', color: '#222', fontSize: '1.05rem' }}>{resume.summary}</div>}
+        {/* Education */}
+        {resume.education.length > 0 && <div><div style={sectionHeader}>EDUCATION</div>
+          {resume.education.map((edu, idx) => (
+            <div key={idx} style={{ marginBottom: '0.5em', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <div>
+                <span style={label}>{edu.institution}</span> - {edu.degree}
+              </div>
+              <div style={dateStyle}>{edu.year}{edu.cgpa && ` | CGPA: ${edu.cgpa}`}</div>
             </div>
-          )}
-          {/* Experience Preview */}
-          {resume.experience.length > 0 && (
-            <div style={{ margin: '1.5rem 0' }}>
-              <strong>Experience:</strong>
-              <ul style={{ paddingLeft: '1.2em', margin: 0 }}>
-                {resume.experience.map((exp, idx) => (
-                  <li key={idx} style={{ marginBottom: '0.5rem' }}>
-                    <span style={{ fontWeight: 'bold' }}>{exp.role}</span> at <span style={{ fontWeight: 'bold' }}>{exp.company}</span> ({exp.duration})<br />
-                    <span style={{ color: '#555', fontSize: '0.95em' }}>{Array.isArray(exp.details) ? exp.details.join(", ") : exp.details}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {/* Projects Preview */}
-          {resume.projects.length > 0 && (
-            <div style={{ margin: '1.5rem 0' }}>
-              <strong>Projects:</strong>
-              <ul style={{ paddingLeft: '1.2em', margin: 0 }}>
-                {resume.projects.map((proj, idx) => (
-                  <li key={idx} style={{ marginBottom: '0.5rem' }}>
-                    <span style={{ fontWeight: 'bold' }}>{proj.title}</span> {proj.link && (<a href={proj.link} target="_blank" rel="noopener noreferrer" style={{ color: '#3b5bdb', marginLeft: 4, fontSize: '0.95em' }}>[link]</a>)}<br />
-                    <span style={{ color: '#555', fontSize: '0.95em' }}>{proj.description}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {/* Education Preview */}
-          {resume.education.length > 0 && (
-            <div style={{ margin: '1.5rem 0' }}>
-              <strong>Education:</strong>
-              <ul style={{ paddingLeft: '1.2em', margin: 0 }}>
-                {resume.education.map((edu, idx) => (
-                  <li key={idx} style={{ marginBottom: '0.5rem' }}>
-                    <span style={{ fontWeight: 'bold' }}>{edu.degree}</span> at <span style={{ fontWeight: 'bold' }}>{edu.institution}</span> ({edu.year})<br />
-                    <span style={{ color: '#555', fontSize: '0.95em' }}>CGPA: {edu.cgpa}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {/* Certifications Preview */}
-          {resume.certifications.length > 0 && (
-            <div style={{ margin: '1.5rem 0' }}>
-              <strong>Certifications:</strong>
-              <ul style={{ paddingLeft: '1.2em', margin: 0 }}>
-                {resume.certifications.map((cert, idx) => (
-                  <li key={idx} style={{ marginBottom: '0.5rem' }}>{cert.name}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {/* Custom Sections Preview */}
-          {resume.customSections.length > 0 && resume.customSections.map((section, idx) => (
-            <div key={idx} style={{ margin: '1.5rem 0' }}>
-              <strong>{section.title}:</strong>
-              <ul style={{ paddingLeft: '1.2em', margin: 0 }}>
-                {section.items && section.items.map((item, i) => (
-                  <li key={i}>{item}</li>
-                ))}
+          ))}
+        </div>}
+        {/* Skills */}
+        {resume.skills.length > 0 && <div><div style={sectionHeader}>SKILLS</div>
+          <div style={{ margin: '0.2em 0 0.7em 0', color: '#222', fontSize: '1.01rem' }}>{resume.skills.join(', ')}</div>
+        </div>}
+        {/* Experience */}
+        {resume.experience.length > 0 && <div><div style={sectionHeader}>EXPERIENCE</div>
+          {resume.experience.map((exp, idx) => (
+            <div key={idx} style={{ marginBottom: '0.5em' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <span style={label}>{exp.role}</span> <span style={dateStyle}>{exp.duration}</span>
+              </div>
+              <div style={{ fontWeight: 500 }}>{exp.company}</div>
+              <ul style={bulletList}>
+                {(exp.details || '').split(',').map((d, i) => d.trim() && <li key={i} style={bullet}>{d.trim()}</li>)}
               </ul>
             </div>
           ))}
-        </div>
+        </div>}
+        {/* Projects */}
+        {resume.projects.length > 0 && <div><div style={sectionHeader}>PROJECTS</div>
+          {resume.projects.map((proj, idx) => (
+            <div key={idx} style={{ marginBottom: '0.5em' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <span style={label}>{proj.title}</span> {proj.link && (<a href={proj.link} target="_blank" rel="noopener noreferrer" style={{ color: '#3b5bdb', marginLeft: 4, fontSize: '0.95em' }}>[GitHub]</a>)}
+              </div>
+              <ul style={bulletList}>
+                {(proj.description || '').split(',').map((d, i) => d.trim() && <li key={i} style={bullet}>{d.trim()}</li>)}
+              </ul>
+            </div>
+          ))}
+        </div>}
+        {/* Certifications */}
+        {resume.certifications.length > 0 && <div><div style={sectionHeader}>CERTIFICATIONS</div>
+          <ul style={bulletList}>
+            {resume.certifications.map((cert, idx) => <li key={idx} style={bullet}>{cert.name}</li>)}
+          </ul>
+        </div>}
+        {/* Custom Sections */}
+        {resume.customSections.length > 0 && resume.customSections.map((section, idx) => (
+          <div key={idx}><div style={sectionHeader}>{section.title.toUpperCase()}</div>
+            <ul style={bulletList}>
+              {section.items && section.items.map((item, i) => <li key={i} style={bullet}>{item}</li>)}
+            </ul>
+          </div>
+        ))}
       </div>
     </div>
   );
