@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import "./index.css";
+import Skills from './components/Skills';
 
 const initialForms = {
   experience: { company: '', role: '', duration: '', details: [''] },
@@ -131,7 +132,7 @@ function App() {
     hobbies: [],
     customSections: [],
   });
-  const [skillInput, setSkillInput] = useState("");
+  const [skillsGroups, setSkillsGroups] = useState([]);
   const [customSectionTitle, setCustomSectionTitle] = useState("");
   const [customSectionItem, setCustomSectionItem] = useState("");
   const previewRef = useRef();
@@ -154,18 +155,6 @@ function App() {
   const handleSummaryChange = (e) => {
     setResume({ ...resume, summary: e.target.value });
   };
-  const handleSkillInput = (e) => setSkillInput(e.target.value);
-  const handleAddSkill = (e) => {
-    e.preventDefault();
-    if (skillInput.trim() && !resume.skills.includes(skillInput.trim())) {
-      setResume({ ...resume, skills: [...resume.skills, skillInput.trim()] });
-      setSkillInput("");
-    }
-  };
-  const handleRemoveSkill = (skill) => {
-    setResume({ ...resume, skills: resume.skills.filter((s) => s !== skill) });
-  };
-
   const handleAddLink = (e) => {
     e.preventDefault();
     if (linkLabel.trim() && linkUrl.trim()) {
@@ -293,21 +282,7 @@ function App() {
           <legend style={{ fontWeight: 'bold', color: '#111', fontSize: '1.15rem', letterSpacing: '0.5px' }}>Summary</legend>
           <textarea placeholder="Short objective or bio" value={resume.summary} onChange={handleSummaryChange} style={{ width: '100%', minHeight: '60px', margin: '8px 0', padding: '8px' }} />
         </fieldset>
-        <fieldset style={{ border: 'none', marginBottom: '1.5rem' }}>
-          <legend style={{ fontWeight: 'bold', color: '#111', fontSize: '1.15rem', letterSpacing: '0.5px' }}>Skills</legend>
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-            <input type="text" placeholder="Add a skill" value={skillInput} onChange={handleSkillInput} style={{ flex: 1, padding: '8px' }} />
-            <button onClick={handleAddSkill} style={{ padding: '8px 12px', background: '#3b5bdb', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Add</button>
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            {resume.skills.map((skill) => (
-              <span key={skill} style={{ background: '#e0e7ff', color: '#111', padding: '4px 10px', borderRadius: '12px', fontSize: '0.98rem', display: 'flex', alignItems: 'center' }}>
-                {skill}
-                <button type="button" onClick={() => handleRemoveSkill(skill)} style={{ marginLeft: '6px', background: 'none', border: 'none', color: '#111', cursor: 'pointer', fontWeight: 'bold' }}>&times;</button>
-              </span>
-            ))}
-          </div>
-        </fieldset>
+        <Skills skillsGroups={skillsGroups} setSkillsGroups={setSkillsGroups} />
         <SectionList sectionKey="experience" title="Experience" items={resume.experience} onAdd={item => addSectionItem("experience", item)} onEdit={(idx, item) => editSectionItem("experience", idx, item)} onDelete={idx => deleteSectionItem("experience", idx)} addLabel="Add Experience" emptyLabel="No experience added." renderItem={(item = {}, onChange, points, setPoints) => onChange ? (<><input name="company" placeholder="Company" value={item.company || ""} onChange={onChange} style={{ padding: '6px' }} /><input name="role" placeholder="Role" value={item.role || ""} onChange={onChange} style={{ padding: '6px' }} /><input name="duration" placeholder="Duration" value={item.duration || ""} onChange={onChange} style={{ padding: '6px' }} /><PointsInput points={points} setPoints={setPoints} /></>) : (<><span style={label}>{item.role}</span> at <span style={label}>{item.company}</span><span style={dateStyle}>{item.duration}</span><ul style={bulletList}>{(item.details || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>)}</ul></>)} />
         <SectionList sectionKey="projects" title="Projects" items={resume.projects} onAdd={item => addSectionItem("projects", item)} onEdit={(idx, item) => editSectionItem("projects", idx, item)} onDelete={idx => deleteSectionItem("projects", idx)} addLabel="Add Project" emptyLabel="No projects added." renderItem={(item = {}, onChange, points, setPoints) => onChange ? (<><input name="title" placeholder="Title" value={item.title || ""} onChange={onChange} style={{ padding: '6px' }} /><input name="link" placeholder="Link" value={item.link || ""} onChange={onChange} style={{ padding: '6px' }} /><PointsInput points={points} setPoints={setPoints} /></>) : (<><span style={label}>{item.title}</span> {item.link && (<a href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: '#3b5bdb', marginLeft: 4, fontSize: '0.95em' }}>[GitHub]</a>)}<ul style={bulletList}>{(item.description || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>)}</ul></>)} />
         <SectionList sectionKey="education" title="Education" items={resume.education} onAdd={item => addSectionItem("education", item)} onEdit={(idx, item) => editSectionItem("education", idx, item)} onDelete={idx => deleteSectionItem("education", idx)} addLabel="Add Education" emptyLabel="No education added." renderItem={(item = {}, onChange) => onChange ? (<><input name="degree" placeholder="Degree" value={item.degree || ""} onChange={onChange} style={{ padding: '6px' }} /><input name="institution" placeholder="Institution" value={item.institution || ""} onChange={onChange} style={{ padding: '6px' }} /><input name="year" placeholder="Year" value={item.year || ""} onChange={onChange} style={{ padding: '6px' }} /><input name="cgpa" placeholder="CGPA" value={item.cgpa || ""} onChange={onChange} style={{ padding: '6px' }} /></>) : (<><span style={label}>{item.degree}</span> at <span style={label}>{item.institution}</span><span style={dateStyle}>{item.year}</span><span style={{ color: '#555', fontSize: '0.98em', marginLeft: 8 }}>CGPA: {item.cgpa}</span></>)} />
@@ -351,7 +326,10 @@ function App() {
               ))}
             </div>
           </div>
-          {resume.summary && <div style={{ margin: '0.7em 0 1.2em 0', color: '#222', fontSize: '1.05rem' }}>{resume.summary}</div>}
+          {/* PROFILE section header and summary */}
+          {resume.summary && <div><div style={sectionHeader}>PROFILE</div>
+            <div style={{ margin: '0.7em 0 1.2em 0', color: '#222', fontSize: '1.05rem' }}>{resume.summary}</div>
+          </div>}
           {/* Education */}
           {resume.education.length > 0 && <div><div style={sectionHeader}>EDUCATION</div>
             {resume.education.map((edu, idx) => (
@@ -364,8 +342,14 @@ function App() {
             ))}
           </div>}
           {/* Skills */}
-          {resume.skills.length > 0 && <div><div style={sectionHeader}>SKILLS</div>
-            <div style={{ margin: '0.2em 0 0.7em 0', color: '#222', fontSize: '1.01rem' }}>{resume.skills.join(', ')}</div>
+          {skillsGroups.length > 0 && <div><div style={sectionHeader}>SKILLS</div>
+            <div style={{ margin: '0.2em 0 0.7em 0', color: '#222', fontSize: '1.01rem' }}>
+              {skillsGroups.map((group, idx) => (
+                <div key={idx} style={{ marginBottom: 2 }}>
+                  <span style={{ fontWeight: 600 }}>{group.name}:</span> {group.skills.join(', ')}
+                </div>
+              ))}
+            </div>
           </div>}
           {/* Experience */}
           {resume.experience.length > 0 && <div><div style={sectionHeader}>EXPERIENCE</div>
