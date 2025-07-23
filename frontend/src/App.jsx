@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import "./index.css";
 import Skills from './components/Skills';
+import Education from './components/Education';
 
 const initialForms = {
   experience: { company: '', role: '', duration: '', details: [''] },
@@ -247,6 +248,8 @@ function App() {
   const bullet = { marginBottom: '0.2em', listStyle: 'disc' };
   const contactLink = { color: '#0645AD', textDecoration: 'underline', margin: '0 0.3em' };
 
+  const [education, setEducation] = useState([]);
+
   return (
     <div className="app-container" style={{ minHeight: '100vh', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', background: 'linear-gradient(135deg, #e0e7ff 0%, #f7f7fa 100%)' }}>
       {/* Left: Resume Form */}
@@ -285,7 +288,7 @@ function App() {
         <Skills skillsGroups={skillsGroups} setSkillsGroups={setSkillsGroups} />
         <SectionList sectionKey="experience" title="Experience" items={resume.experience} onAdd={item => addSectionItem("experience", item)} onEdit={(idx, item) => editSectionItem("experience", idx, item)} onDelete={idx => deleteSectionItem("experience", idx)} addLabel="Add Experience" emptyLabel="No experience added." renderItem={(item = {}, onChange, points, setPoints) => onChange ? (<><input name="company" placeholder="Company" value={item.company || ""} onChange={onChange} style={{ padding: '6px' }} /><input name="role" placeholder="Role" value={item.role || ""} onChange={onChange} style={{ padding: '6px' }} /><input name="duration" placeholder="Duration" value={item.duration || ""} onChange={onChange} style={{ padding: '6px' }} /><PointsInput points={points} setPoints={setPoints} /></>) : (<><span style={label}>{item.role}</span> at <span style={label}>{item.company}</span><span style={dateStyle}>{item.duration}</span><ul style={bulletList}>{(item.details || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>)}</ul></>)} />
         <SectionList sectionKey="projects" title="Projects" items={resume.projects} onAdd={item => addSectionItem("projects", item)} onEdit={(idx, item) => editSectionItem("projects", idx, item)} onDelete={idx => deleteSectionItem("projects", idx)} addLabel="Add Project" emptyLabel="No projects added." renderItem={(item = {}, onChange, points, setPoints) => onChange ? (<><input name="title" placeholder="Title" value={item.title || ""} onChange={onChange} style={{ padding: '6px' }} /><input name="link" placeholder="Link" value={item.link || ""} onChange={onChange} style={{ padding: '6px' }} /><PointsInput points={points} setPoints={setPoints} /></>) : (<><span style={label}>{item.title}</span> {item.link && (<a href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: '#3b5bdb', marginLeft: 4, fontSize: '0.95em' }}>[GitHub]</a>)}<ul style={bulletList}>{(item.description || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>)}</ul></>)} />
-        <SectionList sectionKey="education" title="Education" items={resume.education} onAdd={item => addSectionItem("education", item)} onEdit={(idx, item) => editSectionItem("education", idx, item)} onDelete={idx => deleteSectionItem("education", idx)} addLabel="Add Education" emptyLabel="No education added." renderItem={(item = {}, onChange) => onChange ? (<><input name="degree" placeholder="Degree" value={item.degree || ""} onChange={onChange} style={{ padding: '6px' }} /><input name="institution" placeholder="Institution" value={item.institution || ""} onChange={onChange} style={{ padding: '6px' }} /><input name="year" placeholder="Year" value={item.year || ""} onChange={onChange} style={{ padding: '6px' }} /><input name="cgpa" placeholder="CGPA" value={item.cgpa || ""} onChange={onChange} style={{ padding: '6px' }} /></>) : (<><span style={label}>{item.degree}</span> at <span style={label}>{item.institution}</span><span style={dateStyle}>{item.year}</span><span style={{ color: '#555', fontSize: '0.98em', marginLeft: 8 }}>CGPA: {item.cgpa}</span></>)} />
+        <Education education={education} setEducation={setEducation} />
         <SectionList sectionKey="certifications" title="Certifications" items={resume.certifications} onAdd={item => addSectionItem("certifications", item.name ? item : { name: item })} onEdit={(idx, item) => editSectionItem("certifications", idx, item.name ? item : { name: item })} onDelete={idx => deleteSectionItem("certifications", idx)} addLabel="Add Certification" emptyLabel="No certifications added." renderItem={(item = {}, onChange) => onChange ? (<input name="name" placeholder="Certification" value={item.name || ""} onChange={onChange} style={{ padding: '6px' }} />) : (<span style={label}>{item.name}</span>)} />
         <SectionList sectionKey="achievements" title="Achievements" items={resume.achievements} onAdd={item => addSectionItem("achievements", item)} onEdit={(idx, item) => editSectionItem("achievements", idx, item)} onDelete={idx => deleteSectionItem("achievements", idx)} addLabel="Add Achievement" emptyLabel="No achievements added." renderItem={(item = {}, onChange, points, setPoints) => onChange ? (<PointsInput points={points} setPoints={setPoints} />) : (<ul style={bulletList}>{(item.point || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>)}</ul>)} />
         <SectionList sectionKey="hobbies" title="Hobbies" items={resume.hobbies} onAdd={item => addSectionItem("hobbies", item)} onEdit={(idx, item) => editSectionItem("hobbies", idx, item)} onDelete={idx => deleteSectionItem("hobbies", idx)} addLabel="Add Hobby" emptyLabel="No hobbies added." renderItem={(item = {}, onChange, points, setPoints) => onChange ? (<PointsInput points={points} setPoints={setPoints} />) : (<ul style={bulletList}>{(item.point || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>)}</ul>)} />
@@ -331,13 +334,19 @@ function App() {
             <div style={{ margin: '0.7em 0 1.2em 0', color: '#222', fontSize: '1.05rem' }}>{resume.summary}</div>
           </div>}
           {/* Education */}
-          {resume.education.length > 0 && <div><div style={sectionHeader}>EDUCATION</div>
-            {resume.education.map((edu, idx) => (
-              <div key={idx} style={{ marginBottom: '0.5em', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                <div>
-                  <span style={label}>{edu.institution}</span> - {edu.degree}
+          {education.length > 0 && <div><div style={sectionHeader}>EDUCATION</div>
+            {education.map((ed, idx) => (
+              <div key={idx} style={{ marginBottom: '0.7em', display: 'flex', flexDirection: 'column', gap: 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <div><span style={{ fontWeight: 600 }}>{ed.institution}</span>{ed.location && <span>, {ed.location}</span>}</div>
+                  <div style={{ color: '#444', fontSize: '0.98rem', fontWeight: 400 }}>{ed.duration}</div>
                 </div>
-                <div style={dateStyle}>{edu.year}{edu.cgpa && ` | CGPA: ${edu.cgpa}`}</div>
+                <div style={{ height: '0.2em' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <div style={{ textTransform: 'capitalize' }}>{ed.degree}{ed.branch && ` in ${ed.branch}`}</div>
+                  <div style={{ color: '#444', fontSize: '0.98rem', fontWeight: 400 }}>{ed.cgpa && `CGPA: ${ed.cgpa}`}</div>
+                </div>
+                {ed.extra && <div style={{ fontSize: '0.98rem', color: '#222', marginLeft: 2 }}>{ed.extra}</div>}
               </div>
             ))}
           </div>}
