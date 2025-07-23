@@ -274,88 +274,91 @@ function App() {
         </fieldset>
       </div>
       {/* Right: ATS Resume Preview */}
-      <div ref={previewRef} style={{ flex: 1, background: '#fff', borderRadius: '12px', boxShadow: '0 2px 16px #e0e7ff', padding: '2.5rem 2.5rem 2rem 2.5rem', margin: '2rem 1rem', minHeight: '80vh', overflowY: 'auto', maxHeight: '90vh', fontFamily: 'Arial, Helvetica, sans-serif', color: '#111' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.2rem' }}>
-          <h1 style={{ fontSize: '1.7rem', color: '#111', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', margin: 0 }}>{resume.personalInfo.name || 'Your Name'}</h1>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', fontSize: '1.05rem', margin: '0.5em 0 0.2em 0', gap: '0.5em', color: '#222' }}>
-            {resume.personalInfo.phone && <span>{resume.personalInfo.phone}</span>}
-            {resume.personalInfo.email && <span>| <a href={`mailto:${resume.personalInfo.email}`} style={contactLink}>{resume.personalInfo.email}</a></span>}
-            {resume.personalInfo.linkedin && <span>| <a href={resume.personalInfo.linkedin} style={contactLink}>LinkedIn</a></span>}
-            {resume.personalInfo.github && <span>| <a href={resume.personalInfo.github} style={contactLink}>GitHub</a></span>}
-            {resume.personalInfo.portfolio && <span>| <a href={resume.personalInfo.portfolio} style={contactLink}>Portfolio</a></span>}
-            {resume.personalInfo.leetcode && <span>| <a href={resume.personalInfo.leetcode} style={contactLink}>LeetCode</a></span>}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f7f7fa', borderRadius: '12px', boxShadow: '0 2px 16px #e0e7ff', padding: '2.5rem 2.5rem 2rem 2.5rem', margin: '2rem 1rem', minHeight: '80vh', overflowY: 'auto', maxHeight: '90vh' }}>
+        {/* Download button OUTSIDE previewRef so it is not included in PDF */}
+        <button onClick={handleDownloadPDF} style={{ background: '#111', color: '#fff', border: 'none', borderRadius: 4, padding: '8px 16px', cursor: 'pointer', fontWeight: 600, fontSize: '1rem', marginBottom: '1.2em', alignSelf: 'center' }}>Download PDF</button>
+        <div ref={previewRef} style={{ background: '#fff', borderRadius: '12px', maxWidth: '800px', width: '100%', margin: '0 auto', padding: '2.5rem 2.5rem 2rem 2.5rem', boxShadow: '0 1px 8px #e0e7ff', color: '#111', fontFamily: 'Arial, Helvetica, sans-serif', minHeight: '60vh' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.2rem' }}>
+            <h1 style={{ fontSize: '1.7rem', color: '#111', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', margin: 0 }}>{resume.personalInfo.name || 'Your Name'}</h1>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', fontSize: '1.05rem', margin: '0.5em 0 0.2em 0', gap: '0.5em', color: '#222' }}>
+              {resume.personalInfo.phone && <span>{resume.personalInfo.phone}</span>}
+              {resume.personalInfo.email && <span>| <a href={`mailto:${resume.personalInfo.email}`} style={contactLink}>{resume.personalInfo.email}</a></span>}
+              {resume.personalInfo.linkedin && <span>| <a href={resume.personalInfo.linkedin} style={contactLink}>LinkedIn</a></span>}
+              {resume.personalInfo.github && <span>| <a href={resume.personalInfo.github} style={contactLink}>GitHub</a></span>}
+              {resume.personalInfo.portfolio && <span>| <a href={resume.personalInfo.portfolio} style={contactLink}>Portfolio</a></span>}
+              {resume.personalInfo.leetcode && <span>| <a href={resume.personalInfo.leetcode} style={contactLink}>LeetCode</a></span>}
+            </div>
           </div>
-          <button onClick={handleDownloadPDF} style={{ background: '#111', color: '#fff', border: 'none', borderRadius: 4, padding: '8px 16px', cursor: 'pointer', fontWeight: 600, fontSize: '1rem', marginTop: '0.5em' }}>Download PDF</button>
-        </div>
-        {resume.summary && <div style={{ margin: '0.7em 0 1.2em 0', color: '#222', fontSize: '1.05rem' }}>{resume.summary}</div>}
-        {/* Education */}
-        {resume.education.length > 0 && <div><div style={sectionHeader}>EDUCATION</div>
-          {resume.education.map((edu, idx) => (
-            <div key={idx} style={{ marginBottom: '0.5em', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <div>
-                <span style={label}>{edu.institution}</span> - {edu.degree}
+          {resume.summary && <div style={{ margin: '0.7em 0 1.2em 0', color: '#222', fontSize: '1.05rem' }}>{resume.summary}</div>}
+          {/* Education */}
+          {resume.education.length > 0 && <div><div style={sectionHeader}>EDUCATION</div>
+            {resume.education.map((edu, idx) => (
+              <div key={idx} style={{ marginBottom: '0.5em', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <div>
+                  <span style={label}>{edu.institution}</span> - {edu.degree}
+                </div>
+                <div style={dateStyle}>{edu.year}{edu.cgpa && ` | CGPA: ${edu.cgpa}`}</div>
               </div>
-              <div style={dateStyle}>{edu.year}{edu.cgpa && ` | CGPA: ${edu.cgpa}`}</div>
-            </div>
-          ))}
-        </div>}
-        {/* Skills */}
-        {resume.skills.length > 0 && <div><div style={sectionHeader}>SKILLS</div>
-          <div style={{ margin: '0.2em 0 0.7em 0', color: '#222', fontSize: '1.01rem' }}>{resume.skills.join(', ')}</div>
-        </div>}
-        {/* Experience */}
-        {resume.experience.length > 0 && <div><div style={sectionHeader}>EXPERIENCE</div>
-          {resume.experience.map((exp, idx) => (
-            <div key={idx} style={{ marginBottom: '0.5em' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                <span style={label}>{exp.role}</span> <span style={dateStyle}>{exp.duration}</span>
+            ))}
+          </div>}
+          {/* Skills */}
+          {resume.skills.length > 0 && <div><div style={sectionHeader}>SKILLS</div>
+            <div style={{ margin: '0.2em 0 0.7em 0', color: '#222', fontSize: '1.01rem' }}>{resume.skills.join(', ')}</div>
+          </div>}
+          {/* Experience */}
+          {resume.experience.length > 0 && <div><div style={sectionHeader}>EXPERIENCE</div>
+            {resume.experience.map((exp, idx) => (
+              <div key={idx} style={{ marginBottom: '0.5em' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={label}>{exp.role}</span> <span style={dateStyle}>{exp.duration}</span>
+                </div>
+                <div style={{ fontWeight: 500 }}>{exp.company}</div>
+                <ul style={bulletList}>
+                  {(exp.details || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>)}
+                </ul>
               </div>
-              <div style={{ fontWeight: 500 }}>{exp.company}</div>
-              <ul style={bulletList}>
-                {(exp.details || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>)}
-              </ul>
-            </div>
-          ))}
-        </div>}
-        {/* Projects */}
-        {resume.projects.length > 0 && <div><div style={sectionHeader}>PROJECTS</div>
-          {resume.projects.map((proj, idx) => (
-            <div key={idx} style={{ marginBottom: '0.5em' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                <span style={label}>{proj.title}</span> {proj.link && (<a href={proj.link} target="_blank" rel="noopener noreferrer" style={{ color: '#3b5bdb', marginLeft: 4, fontSize: '0.95em' }}>[GitHub]</a>)}
+            ))}
+          </div>}
+          {/* Projects */}
+          {resume.projects.length > 0 && <div><div style={sectionHeader}>PROJECTS</div>
+            {resume.projects.map((proj, idx) => (
+              <div key={idx} style={{ marginBottom: '0.5em' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={label}>{proj.title}</span> {proj.link && (<a href={proj.link} target="_blank" rel="noopener noreferrer" style={{ color: '#3b5bdb', marginLeft: 4, fontSize: '0.95em' }}>[GitHub]</a>)}
+                </div>
+                <ul style={bulletList}>
+                  {(proj.description || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>)}
+                </ul>
               </div>
-              <ul style={bulletList}>
-                {(proj.description || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>)}
-              </ul>
-            </div>
-          ))}
-        </div>}
-        {/* Certifications */}
-        {resume.certifications.length > 0 && <div><div style={sectionHeader}>CERTIFICATIONS</div>
-          <ul style={bulletList}>
-            {resume.certifications.map((cert, idx) => <li key={idx} style={bullet}>{cert.name}</li>)}
-          </ul>
-        </div>}
-        {/* Achievements */}
-        {resume.achievements.length > 0 && <div><div style={sectionHeader}>ACHIEVEMENTS</div>
-          <ul style={bulletList}>
-            {resume.achievements.map((ach, idx) => (ach.point || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>))}
-          </ul>
-        </div>}
-        {/* Hobbies */}
-        {resume.hobbies.length > 0 && <div><div style={sectionHeader}>HOBBIES</div>
-          <ul style={bulletList}>
-            {resume.hobbies.map((hob, idx) => (hob.point || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>))}
-          </ul>
-        </div>}
-        {/* Custom Sections */}
-        {resume.customSections.length > 0 && resume.customSections.map((section, idx) => (
-          <div key={idx}><div style={sectionHeader}>{section.title.toUpperCase()}</div>
+            ))}
+          </div>}
+          {/* Certifications */}
+          {resume.certifications.length > 0 && <div><div style={sectionHeader}>CERTIFICATIONS</div>
             <ul style={bulletList}>
-              {section.items && section.items.map((item, i) => <li key={i} style={bullet}>{item}</li>)}
+              {resume.certifications.map((cert, idx) => <li key={idx} style={bullet}>{cert.name}</li>)}
             </ul>
-          </div>
-        ))}
+          </div>}
+          {/* Achievements */}
+          {resume.achievements.length > 0 && <div><div style={sectionHeader}>ACHIEVEMENTS</div>
+            <ul style={bulletList}>
+              {resume.achievements.map((ach, idx) => (ach.point || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>))}
+            </ul>
+          </div>}
+          {/* Hobbies */}
+          {resume.hobbies.length > 0 && <div><div style={sectionHeader}>HOBBIES</div>
+            <ul style={bulletList}>
+              {resume.hobbies.map((hob, idx) => (hob.point || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>))}
+            </ul>
+          </div>}
+          {/* Custom Sections */}
+          {resume.customSections.length > 0 && resume.customSections.map((section, idx) => (
+            <div key={idx}><div style={sectionHeader}>{section.title.toUpperCase()}</div>
+              <ul style={bulletList}>
+                {section.items && section.items.map((item, i) => <li key={i} style={bullet}>{item}</li>)}
+              </ul>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
