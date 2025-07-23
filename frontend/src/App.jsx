@@ -119,10 +119,7 @@ function App() {
       name: "",
       email: "",
       phone: "",
-      linkedin: "",
-      github: "",
-      portfolio: "",
-      leetcode: "",
+      links: [], // Array of { label: '', url: '' }
     },
     summary: "",
     skills: [],
@@ -138,6 +135,11 @@ function App() {
   const [customSectionTitle, setCustomSectionTitle] = useState("");
   const [customSectionItem, setCustomSectionItem] = useState("");
   const previewRef = useRef();
+
+  // Header links state for add/edit
+  const [linkLabel, setLinkLabel] = useState("");
+  const [linkUrl, setLinkUrl] = useState("");
+  const [editingLinkIdx, setEditingLinkIdx] = useState(null);
 
   // Handlers for basic fields
   const handlePersonalInfoChange = (e) => {
@@ -162,6 +164,51 @@ function App() {
   };
   const handleRemoveSkill = (skill) => {
     setResume({ ...resume, skills: resume.skills.filter((s) => s !== skill) });
+  };
+
+  const handleAddLink = (e) => {
+    e.preventDefault();
+    if (linkLabel.trim() && linkUrl.trim()) {
+      setResume(r => ({
+        ...r,
+        personalInfo: {
+          ...r.personalInfo,
+          links: [...r.personalInfo.links, { label: linkLabel.trim(), url: linkUrl.trim() }],
+        },
+      }));
+      setLinkLabel("");
+      setLinkUrl("");
+    }
+  };
+  const handleEditLink = (idx) => {
+    setEditingLinkIdx(idx);
+    setLinkLabel(resume.personalInfo.links[idx].label);
+    setLinkUrl(resume.personalInfo.links[idx].url);
+  };
+  const handleSaveLink = (e) => {
+    e.preventDefault();
+    setResume(r => ({
+      ...r,
+      personalInfo: {
+        ...r.personalInfo,
+        links: r.personalInfo.links.map((l, i) => i === editingLinkIdx ? { label: linkLabel.trim(), url: linkUrl.trim() } : l),
+      },
+    }));
+    setEditingLinkIdx(null);
+    setLinkLabel("");
+    setLinkUrl("");
+  };
+  const handleDeleteLink = (idx) => {
+    setResume(r => ({
+      ...r,
+      personalInfo: {
+        ...r.personalInfo,
+        links: r.personalInfo.links.filter((_, i) => i !== idx),
+      },
+    }));
+    setEditingLinkIdx(null);
+    setLinkLabel("");
+    setLinkUrl("");
   };
 
   // Section handlers
@@ -221,10 +268,26 @@ function App() {
           <input name="name" placeholder="Full Name" value={resume.personalInfo.name} onChange={handlePersonalInfoChange} style={{ width: '100%', margin: '8px 0', padding: '8px' }} />
           <input name="email" placeholder="Email" value={resume.personalInfo.email} onChange={handlePersonalInfoChange} style={{ width: '100%', margin: '8px 0', padding: '8px' }} />
           <input name="phone" placeholder="Phone" value={resume.personalInfo.phone} onChange={handlePersonalInfoChange} style={{ width: '100%', margin: '8px 0', padding: '8px' }} />
-          <input name="linkedin" placeholder="LinkedIn" value={resume.personalInfo.linkedin} onChange={handlePersonalInfoChange} style={{ width: '100%', margin: '8px 0', padding: '8px' }} />
-          <input name="github" placeholder="GitHub" value={resume.personalInfo.github} onChange={handlePersonalInfoChange} style={{ width: '100%', margin: '8px 0', padding: '8px' }} />
-          <input name="portfolio" placeholder="Portfolio" value={resume.personalInfo.portfolio} onChange={handlePersonalInfoChange} style={{ width: '100%', margin: '8px 0', padding: '8px' }} />
-          <input name="leetcode" placeholder="LeetCode" value={resume.personalInfo.leetcode} onChange={handlePersonalInfoChange} style={{ width: '100%', margin: '8px 0', padding: '8px' }} />
+          {/* Custom Links UI */}
+          <div style={{ margin: '8px 0' }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>Links</div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              {resume.personalInfo.links.map((l, idx) => (
+                <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+                  <span style={{ fontWeight: 500 }}>{l.label}:</span>
+                  <a href={l.url} target="_blank" rel="noopener noreferrer" style={{ color: '#0645AD', textDecoration: 'underline', fontSize: '0.98em' }}>{l.url}</a>
+                  <button type="button" onClick={() => handleEditLink(idx)} style={{ marginLeft: 4, background: '#e0e7ff', color: '#3b5bdb', border: 'none', borderRadius: 4, padding: '2px 8px', cursor: 'pointer' }}>Edit</button>
+                  <button type="button" onClick={() => handleDeleteLink(idx)} style={{ background: '#ffb4b4', color: '#b91c1c', border: 'none', borderRadius: 4, padding: '2px 8px', cursor: 'pointer' }}>Delete</button>
+                </li>
+              ))}
+            </ul>
+            <form onSubmit={editingLinkIdx === null ? handleAddLink : handleSaveLink} style={{ display: 'flex', gap: 4, marginTop: 4 }}>
+              <input type="text" placeholder="Label (e.g. LinkedIn)" value={linkLabel} onChange={e => setLinkLabel(e.target.value)} style={{ flex: 1, padding: '6px' }} />
+              <input type="text" placeholder="URL" value={linkUrl} onChange={e => setLinkUrl(e.target.value)} style={{ flex: 2, padding: '6px' }} />
+              <button type="submit" style={{ background: '#3b5bdb', color: '#fff', border: 'none', borderRadius: 4, padding: '4px 10px', cursor: 'pointer' }}>{editingLinkIdx === null ? 'Add' : 'Save'}</button>
+              {editingLinkIdx !== null && <button type="button" onClick={() => { setEditingLinkIdx(null); setLinkLabel(""); setLinkUrl(""); }} style={{ background: '#eee', border: 'none', borderRadius: 4, padding: '4px 10px', cursor: 'pointer' }}>Cancel</button>}
+            </form>
+          </div>
         </fieldset>
         <fieldset style={{ border: 'none', marginBottom: '1.5rem' }}>
           <legend style={{ fontWeight: 'bold', color: '#111', fontSize: '1.15rem', letterSpacing: '0.5px' }}>Summary</legend>
@@ -280,13 +343,12 @@ function App() {
         <div ref={previewRef} style={{ background: '#fff', borderRadius: '12px', maxWidth: '800px', width: '100%', margin: '0 auto', padding: '2.5rem 2.5rem 2rem 2.5rem', boxShadow: '0 1px 8px #e0e7ff', color: '#111', fontFamily: 'Arial, Helvetica, sans-serif', minHeight: '60vh' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.2rem' }}>
             <h1 style={{ fontSize: '1.7rem', color: '#111', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', margin: 0 }}>{resume.personalInfo.name || 'Your Name'}</h1>
-            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', fontSize: '1.05rem', margin: '0.5em 0 0.2em 0', gap: '0.5em', color: '#222' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', fontSize: '1.05rem', margin: '0.5em 0 0.2em 0', gap: '0.2em', color: '#222' }}>
               {resume.personalInfo.phone && <span>{resume.personalInfo.phone}</span>}
-              {resume.personalInfo.email && <span>| <a href={`mailto:${resume.personalInfo.email}`} style={contactLink}>{resume.personalInfo.email}</a></span>}
-              {resume.personalInfo.linkedin && <span>| <a href={resume.personalInfo.linkedin} style={contactLink}>LinkedIn</a></span>}
-              {resume.personalInfo.github && <span>| <a href={resume.personalInfo.github} style={contactLink}>GitHub</a></span>}
-              {resume.personalInfo.portfolio && <span>| <a href={resume.personalInfo.portfolio} style={contactLink}>Portfolio</a></span>}
-              {resume.personalInfo.leetcode && <span>| <a href={resume.personalInfo.leetcode} style={contactLink}>LeetCode</a></span>}
+              {resume.personalInfo.email && <span>| {resume.personalInfo.email}</span>}
+              {resume.personalInfo.links.map((l, idx) => (
+                <span key={idx}>| <a href={l.url} target="_blank" rel="noopener noreferrer" style={contactLink}>{l.label}</a></span>
+              ))}
             </div>
           </div>
           {resume.summary && <div style={{ margin: '0.7em 0 1.2em 0', color: '#222', fontSize: '1.05rem' }}>{resume.summary}</div>}
