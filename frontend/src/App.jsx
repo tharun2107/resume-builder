@@ -328,10 +328,20 @@ function App() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f7f7fa', borderRadius: '12px', boxShadow: '0 2px 16px #e0e7ff', padding: '2.5rem 2.5rem 2.5rem 2.5rem', margin: '2rem 1rem', minHeight: '80vh', overflowY: 'auto', maxHeight: '90vh', overflowX: 'hidden' }}>
         {/* Download button OUTSIDE previewRef so it is not included in PDF */}
         <button onClick={handleDownloadPDF} style={{ background: '#111', color: '#fff', border: 'none', borderRadius: 4, padding: '8px 16px', cursor: 'pointer', fontWeight: 600, fontSize: '1rem', marginBottom: '1.2em', alignSelf: 'center' }}>Download PDF</button>
-        <style>{`.pdf-page-break { page-break-before: always; margin-top: 2.5rem; }`}</style>
-        <div ref={previewRef} style={{ background: '#fff', borderRadius: '12px', maxWidth: '750px', width: '100%', padding: '2.5rem 2.5rem 2.5rem 2.5rem', margin: '0 auto', boxShadow: '0 1px 8px #e0e7ff', color: '#111', fontFamily: 'Arial, Helvetica, sans-serif', minHeight: '60vh', overflow: 'hidden', wordBreak: 'break-word', whiteSpace: 'normal', boxSizing: 'border-box' }}>
+        <style>{`
+          @media (max-width: 600px) {
+            .resume-preview-mobile {
+              padding: 1rem !important;
+              font-size: 0.98rem !important;
+            }
+            .resume-header-mobile {
+              font-size: 1.1rem !important;
+            }
+          }
+        `}</style>
+        <div ref={previewRef} className="resume-preview-mobile" style={{ background: '#fff', borderRadius: '12px', maxWidth: '750px', width: '100%', margin: '0 auto', boxSizing: 'border-box', padding: '2.5rem 2.5rem', boxShadow: '0 1px 8px #e0e7ff', color: '#111', fontFamily: 'Arial, Helvetica, sans-serif', minHeight: '60vh', overflow: 'hidden', wordBreak: 'break-word', whiteSpace: 'normal' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.2rem' }}>
-            <h1 style={{ fontSize: '1.5rem', color: '#111', fontWeight: 700, letterSpacing: '0.5px', margin: '0 0 0.2em 0', textAlign: 'center' }}>{resume.personalInfo.name || 'Your Name'}</h1>
+            <h1 className="resume-header-mobile" style={{ fontSize: '1.5rem', color: '#111', fontWeight: 700, letterSpacing: '0.5px', margin: '0 0 0.2em 0', textAlign: 'center' }}>{resume.personalInfo.name || 'Your Name'}</h1>
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', fontSize: '1rem', margin: '0 0 0.1em 0', gap: '0.1em', color: '#222' }}>
               {resume.personalInfo.phone && <span>{resume.personalInfo.phone}</span>}
               {resume.personalInfo.email && <span>| {resume.personalInfo.email}</span>}
