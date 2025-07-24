@@ -329,10 +329,10 @@ function App() {
         {/* Download button OUTSIDE previewRef so it is not included in PDF */}
         <button onClick={handleDownloadPDF} style={{ background: '#111', color: '#fff', border: 'none', borderRadius: 4, padding: '8px 16px', cursor: 'pointer', fontWeight: 600, fontSize: '1rem', marginBottom: '1.2em', alignSelf: 'center' }}>Download PDF</button>
         <style>{`.pdf-page-break { page-break-before: always; margin-top: 2.5rem; }`}</style>
-        <div ref={previewRef} style={{ background: '#fff', borderRadius: '12px', maxWidth: '750px', width: '100%', padding: '2.5rem 2rem 2rem 2rem', margin: '0 auto', boxShadow: '0 1px 8px #e0e7ff', color: '#111', fontFamily: 'Arial, Helvetica, sans-serif', minHeight: '60vh', overflow: 'hidden', wordBreak: 'break-word', whiteSpace: 'normal' }}>
+        <div ref={previewRef} style={{ background: '#fff', borderRadius: '12px', maxWidth: '750px', width: '100%', padding: '2.5rem 2.5rem 2.5rem 2.5rem', margin: '0 auto', boxShadow: '0 1px 8px #e0e7ff', color: '#111', fontFamily: 'Arial, Helvetica, sans-serif', minHeight: '60vh', overflow: 'hidden', wordBreak: 'break-word', whiteSpace: 'normal', boxSizing: 'border-box' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.2rem' }}>
-            <h1 style={{ fontSize: '1.7rem', color: '#111', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', margin: 0 }}>{resume.personalInfo.name || 'Your Name'}</h1>
-            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', fontSize: '1.05rem', margin: '0.5em 0 0.2em 0', gap: '0.2em', color: '#222' }}>
+            <h1 style={{ fontSize: '1.5rem', color: '#111', fontWeight: 700, letterSpacing: '0.5px', margin: '0 0 0.2em 0', textAlign: 'center' }}>{resume.personalInfo.name || 'Your Name'}</h1>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', fontSize: '1rem', margin: '0 0 0.1em 0', gap: '0.1em', color: '#222' }}>
               {resume.personalInfo.phone && <span>{resume.personalInfo.phone}</span>}
               {resume.personalInfo.email && <span>| {resume.personalInfo.email}</span>}
               {resume.personalInfo.links.map((l, idx) => (
@@ -345,7 +345,7 @@ function App() {
             <div style={{ margin: '0.7em 0 1.2em 0', color: '#222', fontSize: '1.05rem' }}>{resume.summary}</div>
           </div>}
           {/* Education */}
-          {resume.education.length > 0 && <div><div style={sectionHeader}>EDUCATION</div>
+          {resume.education.length > 0 && <div style={{ pageBreakInside: 'avoid' }}><div style={sectionHeader}>EDUCATION</div>
             {resume.education.map((ed, idx) => (
               <div key={idx} style={{ marginBottom: '0.3em', display: 'flex', flexDirection: 'column', gap: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
@@ -362,7 +362,7 @@ function App() {
             ))}
           </div>}
           {/* Skills */}
-          {skillsGroups.length > 0 && <div><div style={sectionHeader}>SKILLS</div>
+          {skillsGroups.length > 0 && <div style={{ pageBreakInside: 'avoid' }}><div style={sectionHeader}>SKILLS</div>
             <div style={{ margin: '0.2em 0 0.7em 0', color: '#222', fontSize: '1.01rem' }}>
               {skillsGroups.map((group, idx) => (
                 <div key={idx} style={{ marginBottom: 2 }}>
@@ -372,7 +372,7 @@ function App() {
             </div>
           </div>}
           {/* Experience */}
-          {resume.experience.length > 0 && <div><div style={sectionHeader}>EXPERIENCE</div>
+          {resume.experience.length > 0 && <div style={{ pageBreakInside: 'avoid' }}><div style={sectionHeader}>EXPERIENCE</div>
             {resume.experience.map((exp, idx) => (
               <div key={idx} style={{ marginBottom: '0.3em' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
@@ -386,7 +386,7 @@ function App() {
             ))}
           </div>}
           {/* Projects */}
-          {normalizedProjects.length > 0 && <div><div style={sectionHeader}>PROJECTS</div>
+          {/* {normalizedProjects.length > 0 && <div style={{ pageBreakInside: 'avoid' }}><div style={sectionHeader}>PROJECTS</div>
             {normalizedProjects.map((proj, idx) => (
               <div key={idx} style={{ marginBottom: '0.3em', display: 'flex', flexDirection: 'column', gap: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
@@ -402,21 +402,99 @@ function App() {
                 </ul>
               </div>
             ))}
-          </div>}
-          {/* Certifications */}
-          {resume.certifications.length > 0 && <div className="pdf-page-break"><div style={sectionHeader}>CERTIFICATIONS</div>
-            <ul style={bulletList}>
-              {resume.certifications.flatMap((cert, idx) =>
-                cert.name.split(',').map((item, i) => <li key={idx + '-' + i} style={bullet}>{item.trim()}</li>)
-              )}
-            </ul>
-          </div>}
-          {/* Achievements */}
-          {resume.achievements.length > 0 && <div className="pdf-page-break"><div style={sectionHeader}>ACHIEVEMENTS</div>
-            <ul style={bulletList}>
-              {resume.achievements.map((ach, idx) => (ach.point || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>))}
-            </ul>
-          </div>}
+          </div>} */}
+          {normalizedProjects.length > 0 && (
+            <div style={{ pageBreakInside: 'avoid', marginBottom: '0.5em' }}>
+              <div style={{ ...sectionHeader, marginBottom: '0.1em' }}>PROJECTS</div>
+              {normalizedProjects.map((proj, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    marginBottom: '0.2em',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 0,
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <div>
+                      <span style={{ fontWeight: 600 }}>{proj.title}</span>
+                      {proj.techStack && proj.techStack.length > 0 && (
+                        <span style={{ fontStyle: 'italic', fontSize: '0.98rem', marginLeft: 8 }}>
+                          {proj.techStack.join(', ')}
+                        </span>
+                      )}
+                      {proj.links && proj.links.length > 0 && (
+                        <span style={{ marginLeft: 8 }}>
+                          {proj.links.map(
+                            (l, lIdx) =>
+                              l &&
+                              l.label &&
+                              l.url && (
+                                <a
+                                  key={lIdx}
+                                  href={l.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{
+                                    color: '#0645AD',
+                                    textDecoration: 'underline',
+                                    marginLeft: lIdx > 0 ? 8 : 0,
+                                  }}
+                                >
+                                  {l.label}
+                                </a>
+                              )
+                          )}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ color: '#444', fontSize: '0.98rem', fontWeight: 400 }}>{proj.monthYear}</div>
+                  </div>
+                  <ul style={{ listStyle: 'disc', marginLeft: '1.2em', color: '#222', fontSize: '1.01rem', marginTop: 0, marginBottom: 0 }}>
+                    {proj.description &&
+                      proj.description.map(
+                        (desc, dIdx) =>
+                          desc && (
+                            <li key={dIdx} style={{ marginBottom: '0.15em' }}>
+                              {desc}
+                            </li>
+                          )
+                      )}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          )}
+
+
+          {resume.certifications.length > 0 && (
+            <div style={{ pageBreakInside: 'avoid' }}>
+              <div style={sectionHeader}>CERTIFICATIONS</div>
+              <ul style={bulletList}>
+                {resume.certifications.flatMap((cert, idx) =>
+                  cert.name.split(',').map((item, i) => (
+                    <li key={idx + '-' + i} style={bullet}>
+                      {item.trim()}
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
+          )}
+
+          {resume.achievements.length > 0 && (
+            <div style={{ pageBreakInside: 'avoid' }}>
+              <div style={sectionHeader}>ACHIEVEMENTS</div>
+              <ul style={bulletList}>
+                {resume.achievements.map((ach, idx) =>
+                  (ach.point || []).map(
+                    (d, i) => d && <li key={i} style={bullet}>{d}</li>
+                  )
+                )}
+              </ul>
+            </div>
+          )}
           {/* Hobbies */}
           {resume.hobbies.length > 0 && <div><div style={sectionHeader}>HOBBIES</div>
             <ul style={bulletList}>
