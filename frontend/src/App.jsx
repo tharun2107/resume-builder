@@ -253,7 +253,7 @@ function App() {
   const [projects, setProjects] = useState([]);
 
   // Just before the preview rendering:
-  const normalizedProjects = (projects || []).map(p => ({
+  const normalizedProjects = (resume.projects || []).map(p => ({
     ...p,
     techStack: Array.isArray(p.techStack) ? p.techStack : (p.techStack ? [p.techStack] : []),
     links: Array.isArray(p.links) ? p.links : (p.links ? [p.links] : []),
@@ -267,9 +267,9 @@ function App() {
         <h2 style={{ fontSize: '1.5rem', color: '#111', marginBottom: '1.5rem', fontWeight: 700, letterSpacing: '0.5px' }}>Resume Builder</h2>
         <fieldset style={{ border: 'none', marginBottom: '1.5rem' }}>
           <legend style={{ fontWeight: 'bold', color: '#111', fontSize: '1.15rem', letterSpacing: '0.5px' }}>Personal Info</legend>
-          <input name="name" placeholder="Full Name" value={resume.personalInfo.name} onChange={handlePersonalInfoChange} style={{ width: '100%', margin: '8px 0', padding: '8px' }} />
-          <input name="email" placeholder="Email" value={resume.personalInfo.email} onChange={handlePersonalInfoChange} style={{ width: '100%', margin: '8px 0', padding: '8px' }} />
-          <input name="phone" placeholder="Phone" value={resume.personalInfo.phone} onChange={handlePersonalInfoChange} style={{ width: '100%', margin: '8px 0', padding: '8px' }} />
+          <input name="name" placeholder="Full Name" value={resume.personalInfo.name} onChange={handlePersonalInfoChange} style={{ width: '100%', margin: '8px 0', padding: '10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '1rem' }} />
+          <input name="email" placeholder="Email" value={resume.personalInfo.email} onChange={handlePersonalInfoChange} style={{ width: '100%', margin: '8px 0', padding: '10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '1rem' }} />
+          <input name="phone" placeholder="Phone" value={resume.personalInfo.phone} onChange={handlePersonalInfoChange} style={{ width: '100%', margin: '8px 0', padding: '10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '1rem' }} />
           {/* Custom Links UI */}
           <div style={{ margin: '8px 0' }}>
             <div style={{ fontWeight: 600, marginBottom: 4 }}>Links</div>
@@ -293,11 +293,11 @@ function App() {
         </fieldset>
         <fieldset style={{ border: 'none', marginBottom: '1.5rem' }}>
           <legend style={{ fontWeight: 'bold', color: '#111', fontSize: '1.15rem', letterSpacing: '0.5px' }}>Summary</legend>
-          <textarea placeholder="Short objective or bio" value={resume.summary} onChange={handleSummaryChange} style={{ width: '100%', minHeight: '60px', margin: '8px 0', padding: '8px' }} />
+          <textarea placeholder="Short objective or bio" value={resume.summary} onChange={handleSummaryChange} style={{ width: '100%', minHeight: '60px', margin: '8px 0', padding: '10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '1rem' }} />
         </fieldset>
         <Skills skillsGroups={skillsGroups} setSkillsGroups={setSkillsGroups} />
         <SectionList sectionKey="experience" title="Experience" items={resume.experience} onAdd={item => addSectionItem("experience", item)} onEdit={(idx, item) => editSectionItem("experience", idx, item)} onDelete={idx => deleteSectionItem("experience", idx)} addLabel="Add Experience" emptyLabel="No experience added." renderItem={(item = {}, onChange, points, setPoints) => onChange ? (<><input name="company" placeholder="Company" value={item.company || ""} onChange={onChange} style={{ padding: '6px' }} /><input name="role" placeholder="Role" value={item.role || ""} onChange={onChange} style={{ padding: '6px' }} /><input name="duration" placeholder="Duration" value={item.duration || ""} onChange={onChange} style={{ padding: '6px' }} /><PointsInput points={points} setPoints={setPoints} /></>) : (<><span style={label}>{item.role}</span> at <span style={label}>{item.company}</span><span style={dateStyle}>{item.duration}</span><ul style={bulletList}>{(item.details || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>)}</ul></>)} />
-        <Projects projects={projects} setProjects={setProjects} />
+        <Projects projects={resume.projects} setProjects={projs => setResume({ ...resume, projects: projs })} />
         <SectionList sectionKey="certifications" title="Certifications" items={resume.certifications} onAdd={item => addSectionItem("certifications", item.name ? item : { name: item })} onEdit={(idx, item) => editSectionItem("certifications", idx, item.name ? item : { name: item })} onDelete={idx => deleteSectionItem("certifications", idx)} addLabel="Add Certification" emptyLabel="No certifications added." renderItem={(item = {}, onChange) => onChange ? (<input name="name" placeholder="Certification" value={item.name || ""} onChange={onChange} style={{ padding: '6px' }} />) : (<span style={label}>{item.name}</span>)} />
         <SectionList sectionKey="achievements" title="Achievements" items={resume.achievements} onAdd={item => addSectionItem("achievements", item)} onEdit={(idx, item) => editSectionItem("achievements", idx, item)} onDelete={idx => deleteSectionItem("achievements", idx)} addLabel="Add Achievement" emptyLabel="No achievements added." renderItem={(item = {}, onChange, points, setPoints) => onChange ? (<PointsInput points={points} setPoints={setPoints} />) : (<ul style={bulletList}>{(item.point || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>)}</ul>)} />
         <SectionList sectionKey="hobbies" title="Hobbies" items={resume.hobbies} onAdd={item => addSectionItem("hobbies", item)} onEdit={(idx, item) => editSectionItem("hobbies", idx, item)} onDelete={idx => deleteSectionItem("hobbies", idx)} addLabel="Add Hobby" emptyLabel="No hobbies added." renderItem={(item = {}, onChange, points, setPoints) => onChange ? (<PointsInput points={points} setPoints={setPoints} />) : (<ul style={bulletList}>{(item.point || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>)}</ul>)} />
@@ -324,10 +324,10 @@ function App() {
         </fieldset>
       </div>
       {/* Right: ATS Resume Preview */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f7f7fa', borderRadius: '12px', boxShadow: '0 2px 16px #e0e7ff', padding: '2.5rem 2.5rem 2rem 2.5rem', margin: '2rem 1rem', minHeight: '80vh', overflowY: 'auto', maxHeight: '90vh' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f7f7fa', borderRadius: '12px', boxShadow: '0 2px 16px #e0e7ff', padding: '2.5rem 2.5rem 2rem 2.5rem', margin: '2rem 1rem', minHeight: '80vh', overflowY: 'auto', maxHeight: '90vh', overflowX: 'hidden' }}>
         {/* Download button OUTSIDE previewRef so it is not included in PDF */}
         <button onClick={handleDownloadPDF} style={{ background: '#111', color: '#fff', border: 'none', borderRadius: 4, padding: '8px 16px', cursor: 'pointer', fontWeight: 600, fontSize: '1rem', marginBottom: '1.2em', alignSelf: 'center' }}>Download PDF</button>
-        <div ref={previewRef} style={{ background: '#fff', borderRadius: '12px', maxWidth: '800px', width: '100%', margin: '0 auto', padding: '2.5rem 2.5rem 2rem 2.5rem', boxShadow: '0 1px 8px #e0e7ff', color: '#111', fontFamily: 'Arial, Helvetica, sans-serif', minHeight: '60vh' }}>
+        <div ref={previewRef} style={{ background: '#fff', borderRadius: '12px', maxWidth: '900px', minWidth: '700px', width: '100%', margin: '0 auto', padding: '2.5rem 2.5rem 2rem 2.5rem', boxShadow: '0 1px 8px #e0e7ff', color: '#111', fontFamily: 'Arial, Helvetica, sans-serif', minHeight: '60vh', overflow: 'hidden' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.2rem' }}>
             <h1 style={{ fontSize: '1.7rem', color: '#111', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', margin: 0 }}>{resume.personalInfo.name || 'Your Name'}</h1>
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', fontSize: '1.05rem', margin: '0.5em 0 0.2em 0', gap: '0.2em', color: '#222' }}>
