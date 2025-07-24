@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import "./index.css";
 import Skills from './components/Skills';
 import Education from './components/Education';
+import Projects from './components/Projects';
 
 const initialForms = {
   experience: { company: '', role: '', duration: '', details: [''] },
@@ -249,6 +250,15 @@ function App() {
   const contactLink = { color: '#0645AD', textDecoration: 'underline', margin: '0 0.3em' };
 
   const [education, setEducation] = useState([]);
+  const [projects, setProjects] = useState([]);
+
+  // Just before the preview rendering:
+  const normalizedProjects = (projects || []).map(p => ({
+    ...p,
+    techStack: Array.isArray(p.techStack) ? p.techStack : (p.techStack ? [p.techStack] : []),
+    links: Array.isArray(p.links) ? p.links : (p.links ? [p.links] : []),
+    description: Array.isArray(p.description) ? p.description : (p.description ? [p.description] : []),
+  }));
 
   return (
     <div className="app-container" style={{ minHeight: '100vh', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', background: 'linear-gradient(135deg, #e0e7ff 0%, #f7f7fa 100%)' }}>
@@ -287,8 +297,7 @@ function App() {
         </fieldset>
         <Skills skillsGroups={skillsGroups} setSkillsGroups={setSkillsGroups} />
         <SectionList sectionKey="experience" title="Experience" items={resume.experience} onAdd={item => addSectionItem("experience", item)} onEdit={(idx, item) => editSectionItem("experience", idx, item)} onDelete={idx => deleteSectionItem("experience", idx)} addLabel="Add Experience" emptyLabel="No experience added." renderItem={(item = {}, onChange, points, setPoints) => onChange ? (<><input name="company" placeholder="Company" value={item.company || ""} onChange={onChange} style={{ padding: '6px' }} /><input name="role" placeholder="Role" value={item.role || ""} onChange={onChange} style={{ padding: '6px' }} /><input name="duration" placeholder="Duration" value={item.duration || ""} onChange={onChange} style={{ padding: '6px' }} /><PointsInput points={points} setPoints={setPoints} /></>) : (<><span style={label}>{item.role}</span> at <span style={label}>{item.company}</span><span style={dateStyle}>{item.duration}</span><ul style={bulletList}>{(item.details || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>)}</ul></>)} />
-        <SectionList sectionKey="projects" title="Projects" items={resume.projects} onAdd={item => addSectionItem("projects", item)} onEdit={(idx, item) => editSectionItem("projects", idx, item)} onDelete={idx => deleteSectionItem("projects", idx)} addLabel="Add Project" emptyLabel="No projects added." renderItem={(item = {}, onChange, points, setPoints) => onChange ? (<><input name="title" placeholder="Title" value={item.title || ""} onChange={onChange} style={{ padding: '6px' }} /><input name="link" placeholder="Link" value={item.link || ""} onChange={onChange} style={{ padding: '6px' }} /><PointsInput points={points} setPoints={setPoints} /></>) : (<><span style={label}>{item.title}</span> {item.link && (<a href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: '#3b5bdb', marginLeft: 4, fontSize: '0.95em' }}>[GitHub]</a>)}<ul style={bulletList}>{(item.description || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>)}</ul></>)} />
-        <Education education={education} setEducation={setEducation} />
+        <Projects projects={projects} setProjects={setProjects} />
         <SectionList sectionKey="certifications" title="Certifications" items={resume.certifications} onAdd={item => addSectionItem("certifications", item.name ? item : { name: item })} onEdit={(idx, item) => editSectionItem("certifications", idx, item.name ? item : { name: item })} onDelete={idx => deleteSectionItem("certifications", idx)} addLabel="Add Certification" emptyLabel="No certifications added." renderItem={(item = {}, onChange) => onChange ? (<input name="name" placeholder="Certification" value={item.name || ""} onChange={onChange} style={{ padding: '6px' }} />) : (<span style={label}>{item.name}</span>)} />
         <SectionList sectionKey="achievements" title="Achievements" items={resume.achievements} onAdd={item => addSectionItem("achievements", item)} onEdit={(idx, item) => editSectionItem("achievements", idx, item)} onDelete={idx => deleteSectionItem("achievements", idx)} addLabel="Add Achievement" emptyLabel="No achievements added." renderItem={(item = {}, onChange, points, setPoints) => onChange ? (<PointsInput points={points} setPoints={setPoints} />) : (<ul style={bulletList}>{(item.point || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>)}</ul>)} />
         <SectionList sectionKey="hobbies" title="Hobbies" items={resume.hobbies} onAdd={item => addSectionItem("hobbies", item)} onEdit={(idx, item) => editSectionItem("hobbies", idx, item)} onDelete={idx => deleteSectionItem("hobbies", idx)} addLabel="Add Hobby" emptyLabel="No hobbies added." renderItem={(item = {}, onChange, points, setPoints) => onChange ? (<PointsInput points={points} setPoints={setPoints} />) : (<ul style={bulletList}>{(item.point || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>)}</ul>)} />
@@ -375,14 +384,19 @@ function App() {
             ))}
           </div>}
           {/* Projects */}
-          {resume.projects.length > 0 && <div><div style={sectionHeader}>PROJECTS</div>
-            {resume.projects.map((proj, idx) => (
-              <div key={idx} style={{ marginBottom: '0.5em' }}>
+          {normalizedProjects.length > 0 && <div><div style={sectionHeader}>PROJECTS</div>
+            {normalizedProjects.map((proj, idx) => (
+              <div key={idx} style={{ marginBottom: '0.7em', display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <span style={label}>{proj.title}</span> {proj.link && (<a href={proj.link} target="_blank" rel="noopener noreferrer" style={{ color: '#3b5bdb', marginLeft: 4, fontSize: '0.95em' }}>[GitHub]</a>)}
+                  <div>
+                    <span style={{ fontWeight: 600 }}>{proj.title}</span>
+                    {proj.techStack && proj.techStack.length > 0 && <span style={{ fontStyle: 'italic', fontSize: '0.98rem', marginLeft: 8 }}>{proj.techStack.join(', ')}</span>}
+                    {proj.links && proj.links.length > 0 && <span style={{ marginLeft: 8 }}>{proj.links.map((l, lIdx) => l && l.label && l.url && <a key={lIdx} href={l.url} target="_blank" rel="noopener noreferrer" style={{ color: '#0645AD', textDecoration: 'underline', marginLeft: lIdx > 0 ? 8 : 0 }}>{l.label}</a>)}</span>}
+                  </div>
+                  <div style={{ color: '#444', fontSize: '0.98rem', fontWeight: 400 }}>{proj.monthYear}</div>
                 </div>
-                <ul style={bulletList}>
-                  {(proj.description || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>)}
+                <ul style={{ listStyle: 'disc', marginLeft: '1.2em', color: '#222', fontSize: '1.01rem' }}>
+                  {proj.description && proj.description.map((desc, dIdx) => desc && <li key={dIdx} style={{ marginBottom: '0.2em' }}>{desc}</li>)}
                 </ul>
               </div>
             ))}
