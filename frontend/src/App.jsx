@@ -46,7 +46,8 @@ function SectionList({ sectionKey, title, items, onAdd, onEdit, onDelete, render
       setForm(initialForms[sectionKey] || {});
       setPoints(['']);
     }
-    // eslint-disable-next-line
+    // eslint-disable-next-line 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editingIndex]);
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
   const handleEdit = (idx) => setEditingIndex(idx);
