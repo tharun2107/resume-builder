@@ -242,7 +242,7 @@ function App() {
   };
 
   // ATS-friendly preview styles
-  const sectionHeader = { fontWeight: 700, fontSize: '1.1rem', color: '#111', borderBottom: '1px solid #bbb', margin: '1.2em 0 0.5em 0', letterSpacing: '0.5px' };
+  const sectionHeader = { fontWeight: 700, fontSize: '1.1rem', color: '#111', borderBottom: '1px solid #bbb', margin: '0.7em 0 0.3em 0', letterSpacing: '0.5px' };
   const label = { fontWeight: 700, color: '#111' };
   const dateStyle = { float: 'right', color: '#444', fontSize: '0.98rem', fontWeight: 400 };
   const bulletList = { margin: '0.2em 0 0.7em 1.2em', padding: 0, color: '#222', fontSize: '1.01rem' };
@@ -325,10 +325,11 @@ function App() {
         </fieldset>
       </div>
       {/* Right: ATS Resume Preview */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f7f7fa', borderRadius: '12px', boxShadow: '0 2px 16px #e0e7ff', padding: '2.5rem 2.5rem 2rem 2.5rem', margin: '2rem 1rem', minHeight: '80vh', overflowY: 'auto', maxHeight: '90vh', overflowX: 'hidden' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f7f7fa', borderRadius: '12px', boxShadow: '0 2px 16px #e0e7ff', padding: '2.5rem 2.5rem 2.5rem 2.5rem', margin: '2rem 1rem', minHeight: '80vh', overflowY: 'auto', maxHeight: '90vh', overflowX: 'hidden' }}>
         {/* Download button OUTSIDE previewRef so it is not included in PDF */}
         <button onClick={handleDownloadPDF} style={{ background: '#111', color: '#fff', border: 'none', borderRadius: 4, padding: '8px 16px', cursor: 'pointer', fontWeight: 600, fontSize: '1rem', marginBottom: '1.2em', alignSelf: 'center' }}>Download PDF</button>
-        <div ref={previewRef} style={{ background: '#fff', borderRadius: '12px', maxWidth: '900px', minWidth: '700px', width: '100%', margin: '0 auto', padding: '2.5rem 0.5in 2rem 0.5in', boxShadow: '0 1px 8px #e0e7ff', color: '#111', fontFamily: 'Arial, Helvetica, sans-serif', minHeight: '60vh', overflow: 'hidden' }}>
+        <style>{`.pdf-page-break { page-break-before: always; margin-top: 2.5rem; }`}</style>
+        <div ref={previewRef} style={{ background: '#fff', borderRadius: '12px', maxWidth: '750px', width: '100%', padding: '2.5rem 2rem 2rem 2rem', margin: '0 auto', boxShadow: '0 1px 8px #e0e7ff', color: '#111', fontFamily: 'Arial, Helvetica, sans-serif', minHeight: '60vh', overflow: 'hidden', wordBreak: 'break-word', whiteSpace: 'normal' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.2rem' }}>
             <h1 style={{ fontSize: '1.7rem', color: '#111', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', margin: 0 }}>{resume.personalInfo.name || 'Your Name'}</h1>
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', fontSize: '1.05rem', margin: '0.5em 0 0.2em 0', gap: '0.2em', color: '#222' }}>
@@ -346,7 +347,7 @@ function App() {
           {/* Education */}
           {resume.education.length > 0 && <div><div style={sectionHeader}>EDUCATION</div>
             {resume.education.map((ed, idx) => (
-              <div key={idx} style={{ marginBottom: '0.7em', display: 'flex', flexDirection: 'column', gap: 0 }}>
+              <div key={idx} style={{ marginBottom: '0.3em', display: 'flex', flexDirection: 'column', gap: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <div><span style={{ fontWeight: 600 }}>{ed.institution}</span>{ed.location && <span>, {ed.location}</span>}</div>
                   <div style={{ color: '#444', fontSize: '0.98rem', fontWeight: 400 }}>{ed.duration}</div>
@@ -373,7 +374,7 @@ function App() {
           {/* Experience */}
           {resume.experience.length > 0 && <div><div style={sectionHeader}>EXPERIENCE</div>
             {resume.experience.map((exp, idx) => (
-              <div key={idx} style={{ marginBottom: '0.5em' }}>
+              <div key={idx} style={{ marginBottom: '0.3em' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <span style={label}>{exp.role}</span> <span style={dateStyle}>{exp.duration}</span>
                 </div>
@@ -387,7 +388,7 @@ function App() {
           {/* Projects */}
           {normalizedProjects.length > 0 && <div><div style={sectionHeader}>PROJECTS</div>
             {normalizedProjects.map((proj, idx) => (
-              <div key={idx} style={{ marginBottom: '0.7em', display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <div key={idx} style={{ marginBottom: '0.3em', display: 'flex', flexDirection: 'column', gap: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <div>
                     <span style={{ fontWeight: 600 }}>{proj.title}</span>
@@ -403,13 +404,15 @@ function App() {
             ))}
           </div>}
           {/* Certifications */}
-          {resume.certifications.length > 0 && <div><div style={sectionHeader}>CERTIFICATIONS</div>
+          {resume.certifications.length > 0 && <div className="pdf-page-break"><div style={sectionHeader}>CERTIFICATIONS</div>
             <ul style={bulletList}>
-              {resume.certifications.map((cert, idx) => <li key={idx} style={bullet}>{cert.name}</li>)}
+              {resume.certifications.flatMap((cert, idx) =>
+                cert.name.split(',').map((item, i) => <li key={idx + '-' + i} style={bullet}>{item.trim()}</li>)
+              )}
             </ul>
           </div>}
           {/* Achievements */}
-          {resume.achievements.length > 0 && <div><div style={sectionHeader}>ACHIEVEMENTS</div>
+          {resume.achievements.length > 0 && <div className="pdf-page-break"><div style={sectionHeader}>ACHIEVEMENTS</div>
             <ul style={bulletList}>
               {resume.achievements.map((ach, idx) => (ach.point || []).map((d, i) => d && <li key={i} style={bullet}>{d}</li>))}
             </ul>
