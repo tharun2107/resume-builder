@@ -339,7 +339,7 @@ function App() {
             }
           }
         `}</style>
-        <div ref={previewRef} className="resume-preview-mobile" style={{ background: '#fff', borderRadius: '12px', maxWidth: '750px', width: '100%', margin: '0 auto', boxSizing: 'border-box', padding: '2.5rem 2.5rem', boxShadow: '0 1px 8px #e0e7ff', color: '#111', fontFamily: 'Arial, Helvetica, sans-serif', minHeight: '60vh', overflow: 'hidden', wordBreak: 'break-word', whiteSpace: 'normal' }}>
+        <div ref={previewRef} className="resume-preview-mobile" style={{ width: '210mm', minHeight: '297mm', maxWidth: '210mm', boxShadow: '0 1px 8px #e0e7ff', margin: '0 auto', position: 'relative', background: '#fff', padding: '2.5rem 2.5rem', boxSizing: 'border-box', overflow: 'visible' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.2rem' }}>
             <h1 className="resume-header-mobile" style={{ fontSize: '1.5rem', color: '#111', fontWeight: 700, letterSpacing: '0.5px', margin: '0 0 0.2em 0', textAlign: 'center' }}>{resume.personalInfo.name || 'Your Name'}</h1>
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', fontSize: '1rem', margin: '0 0 0.1em 0', gap: '0.1em', color: '#222' }}>
@@ -461,7 +461,7 @@ function App() {
                     </div>
                     <div style={{ color: '#444', fontSize: '0.98rem', fontWeight: 400 }}>{proj.monthYear}</div>
                   </div>
-                  <ul style={{ listStyle: 'disc', marginLeft: '1.2em', color: '#222', fontSize: '1.01rem', marginTop: 0, marginBottom: 0 }}>
+                  <ul style={{ listStyle: 'disc', marginLeft: '0.7em', color: '#222', fontSize: '1.01rem', marginTop: 0, marginBottom: 0 }}>
                     {proj.description &&
                       proj.description.map(
                         (desc, dIdx) =>
@@ -519,6 +519,7 @@ function App() {
               </ul>
             </div>
           ))}
+          <div style={{ position: 'absolute', left: 0, right: 0, top: '297mm', height: 0, borderTop: '1.5px dashed #bbb', opacity: 0.5, pointerEvents: 'none', zIndex: 10, width: '100%' }} className="page-break-indicator" />
         </div>
       </div>
     </div>
